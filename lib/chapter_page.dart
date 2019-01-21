@@ -20,7 +20,8 @@ class _ChapterPageState extends State<ChapterPage> {
   int currentChapter;
   ScrollController scrollController;
   bool chapterLoaded = false;
-  bool lock = false;
+  bool releaseScreen = false;
+  double pullDistance = 100.0;
 
   _ChapterPageState(this.currentChapter);
 
@@ -28,31 +29,7 @@ class _ChapterPageState extends State<ChapterPage> {
   void initState() {
     super.initState();
     scrollController = ScrollController();
-    scrollController.addListener(scrollListener);
     loadChapter();
-  }
-
-  void scrollListener() {
-    //print(scrollController.offset);
-//    if (lock == false) {
-//      print("Locking");
-//      if (scrollController.offset >=
-//              scrollController.position.maxScrollExtent &&
-//          !scrollController.position.outOfRange) {
-//        lock = true;
-//        //Bottom
-//        currentChapter += 1;
-//        //loadChapter();
-//      }
-//      if (scrollController.offset <=
-//              scrollController.position.minScrollExtent &&
-//          !scrollController.position.outOfRange) {
-//        //Top
-//        lock = true;
-//        currentChapter -= 1;
-//        //loadChapter();
-//      }
-//    }
   }
 
   void _changeOpacity() {
@@ -71,9 +48,8 @@ class _ChapterPageState extends State<ChapterPage> {
         //print("DONE LOADING CHAPTER");
         chapter = result;
         if (chapterLoaded) {
-          scrollController.jumpTo(10);
-          print("Unlocking");
-          lock = false;
+          //scrollController.jumpTo(10);
+
         }
       });
     });
@@ -107,32 +83,54 @@ class _ChapterPageState extends State<ChapterPage> {
     }
     return Stack(
       children: <Widget>[
-        ListView(
-          controller: scrollController,
-          physics: BouncingScrollPhysics(),
-          children: <Widget>[
-            GestureDetector(
-              onTap: _changeOpacity,
-              onPanUpdate: (details) {
-                print(details.toString());
-              },
-              child: Container(
-                padding: EdgeInsets.all(20.0),
-                child: Column(children: [
-                  Text(
-                    titleText,
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 30.0),
+        Listener(
+            onPointerUp: (pointer) {
+              releaseScreen = true;
+              if (scrollController.offset >=
+                  scrollController.position.maxScrollExtent + pullDistance) {
+                //Bottom
+                currentChapter += 1;
+                loadChapter();
+                scrollController
+                    .jumpTo(scrollController.position.minScrollExtent);
+              } else if (scrollController.offset <=
+                  scrollController.position.minScrollExtent - pullDistance) {
+                //Top
+                currentChapter -= 1;
+                loadChapter();
+                scrollController
+                    .jumpTo(scrollController.position.maxScrollExtent);
+              }
+              print(scrollController.offset);
+              //print(scrollController.position.maxScrollExtent)
+              print(currentChapter);
+            },
+            onPointerDown: (pointer) {
+              releaseScreen = false;
+            },
+            child: ListView(
+              controller: scrollController,
+              physics: BouncingScrollPhysics(),
+              children: <Widget>[
+                GestureDetector(
+                  onTap: _changeOpacity,
+                  child: Container(
+                    padding: EdgeInsets.all(20.0),
+                    child: Column(children: [
+                      Text(
+                        titleText,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 30.0),
+                      ),
+                      Text(
+                        chapterText,
+                        style: TextStyle(fontSize: 20.0),
+                      ),
+                    ]),
                   ),
-                  Text(
-                    chapterText,
-                    style: TextStyle(fontSize: 20.0),
-                  ),
-                ]),
-              ),
-            ),
-          ],
-        ),
+                )
+              ],
+            )),
         AnimatedContainer(
           width: double.infinity,
           height: containerHeight,
