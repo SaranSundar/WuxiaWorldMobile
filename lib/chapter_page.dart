@@ -24,6 +24,7 @@ class _ChapterPageState extends State<ChapterPage> {
   double pullDistance = 100.0;
   final String top = "Top";
   final String bottom = "Bottom";
+  bool showLoadingScreen = true;
 
   _ChapterPageState(this.currentChapter);
 
@@ -42,17 +43,19 @@ class _ChapterPageState extends State<ChapterPage> {
   }
 
   void loadChapter(String direction) {
-    if (direction == top) {
-      scrollController.jumpTo(scrollController.position.maxScrollExtent);
-    } else if (direction == bottom) {
-      scrollController.jumpTo(scrollController.position.minScrollExtent);
-    }
     setState(() {
-      chapter = []; // Reset chapter to show loading animation
+      showLoadingScreen = true;
+      //chapter = []; // Reset chapter to show loading animation
     });
     getChapter().then((result) {
       setState(() {
         chapter = result;
+        if (direction == top) {
+          scrollController.jumpTo(scrollController.position.maxScrollExtent);
+        } else if (direction == bottom) {
+          scrollController.jumpTo(scrollController.position.minScrollExtent);
+        }
+        showLoadingScreen = false;
       });
     });
   }
@@ -83,9 +86,6 @@ class _ChapterPageState extends State<ChapterPage> {
     var chapterText = "";
     var titleText = "";
     if (chapter.length < 1) {
-      return Center(
-        child: CircularProgressIndicator(),
-      );
     } else if (chapter.length == 1 && chapter[0] == "ERROR") {
       chapterText = "Chapter doesn't exist or try reloading the page.";
       titleText = "ERROR";
@@ -100,17 +100,27 @@ class _ChapterPageState extends State<ChapterPage> {
     return Stack(
       // Stacks List View with Options Menu on Top
       children: <Widget>[
-        Listener(
-            onPointerUp: (pointer) {
-              releaseScreen = true;
-              scrollPage();
-            },
-            onPointerDown: (pointer) {
-              releaseScreen = false;
-            },
-            child: getChapterWidget(
-                titleText, chapterText, queryData.size.height)),
-        getOptionsMenu(),
+        Visibility(
+          maintainState: true,
+          visible: !showLoadingScreen,
+          child: Listener(
+              onPointerUp: (pointer) {
+                releaseScreen = true;
+                scrollPage();
+              },
+              onPointerDown: (pointer) {
+                releaseScreen = false;
+              },
+              child: getChapterWidget(
+                  titleText, chapterText, queryData.size.height)),
+        ),
+        Visibility(visible: !showLoadingScreen, child: getOptionsMenu()),
+        Visibility(
+          visible: showLoadingScreen,
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        )
       ],
     );
   }
