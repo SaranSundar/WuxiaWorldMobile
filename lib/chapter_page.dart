@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import './html_scraper.dart';
@@ -25,6 +27,8 @@ class _ChapterPageState extends State<ChapterPage> {
   final String top = "Top";
   final String bottom = "Bottom";
   bool showLoadingScreen = true;
+  bool changeScroll = false;
+  String tempDirection = "Bottom";
 
   _ChapterPageState(this.currentChapter);
 
@@ -49,14 +53,23 @@ class _ChapterPageState extends State<ChapterPage> {
     });
     getChapter().then((result) {
       setState(() {
+        print("setting state 1");
         chapter = result;
-        if (direction == top) {
-          scrollController.jumpTo(scrollController.position.maxScrollExtent);
-        } else if (direction == bottom) {
-          scrollController.jumpTo(scrollController.position.minScrollExtent);
-        }
         showLoadingScreen = false;
+        changeScroll = true;
+        tempDirection = direction;
       });
+//      setState(() {
+//        print("setting state 2");
+//        if (changeScroll) {
+//          changeScroll = false;
+//          if (tempDirection == top) {
+//            scrollController.jumpTo(scrollController.position.maxScrollExtent);
+//          } else if (tempDirection == bottom) {
+//            scrollController.jumpTo(scrollController.position.minScrollExtent);
+//          }
+//        }
+//      });
     });
   }
 
@@ -82,6 +95,8 @@ class _ChapterPageState extends State<ChapterPage> {
 
   @override
   Widget build(BuildContext context) {
+    print("building widget");
+    scrollListView();
     MediaQueryData queryData = MediaQuery.of(context);
     var chapterText = "";
     var titleText = "";
@@ -97,7 +112,7 @@ class _ChapterPageState extends State<ChapterPage> {
     if (chapter.length > 0) {
       chapterLoaded = true;
     }
-    return Stack(
+    var stack = Stack(
       // Stacks List View with Options Menu on Top
       children: <Widget>[
         Visibility(
@@ -123,11 +138,33 @@ class _ChapterPageState extends State<ChapterPage> {
         )
       ],
     );
+    return stack;
+  }
+
+  void scrollListView() {
+    if (changeScroll) {
+      changeScroll = false;
+      if (tempDirection == top) {
+        Timer(
+            Duration(milliseconds: 0),
+            () => scrollController
+                .jumpTo(scrollController.position.maxScrollExtent));
+
+        //scrollController.jumpTo(scrollController.position.maxScrollExtent);
+      } else if (tempDirection == bottom) {
+        Timer(
+            Duration(milliseconds: 0),
+            () => scrollController
+                .jumpTo(scrollController.position.minScrollExtent));
+
+        //scrollController.jumpTo(scrollController.position.minScrollExtent);
+      }
+    }
   }
 
   Widget getChapterWidget(
       String titleText, String chapterText, double screenHeight) {
-    return ListView(
+    var l = ListView(
       controller: scrollController,
       physics: BouncingScrollPhysics(),
       children: <Widget>[
@@ -152,6 +189,7 @@ class _ChapterPageState extends State<ChapterPage> {
         )
       ],
     );
+    return l;
   }
 
   Widget getOptionsMenu() {
