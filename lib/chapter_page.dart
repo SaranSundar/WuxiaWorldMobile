@@ -19,7 +19,7 @@ class _ChapterPageState extends State<ChapterPage> {
   List<String> chapter = [];
   double opacityLevel = 0.0;
   double containerHeight = 0.0;
-  int currentChapter;
+  int currentChapter, inputChapter;
   ScrollController scrollController;
   bool chapterLoaded = false;
   bool releaseScreen = false;
@@ -53,23 +53,11 @@ class _ChapterPageState extends State<ChapterPage> {
     });
     getChapter().then((result) {
       setState(() {
-        print("setting state 1");
         chapter = result;
         showLoadingScreen = false;
         changeScroll = true;
         tempDirection = direction;
       });
-//      setState(() {
-//        print("setting state 2");
-//        if (changeScroll) {
-//          changeScroll = false;
-//          if (tempDirection == top) {
-//            scrollController.jumpTo(scrollController.position.maxScrollExtent);
-//          } else if (tempDirection == bottom) {
-//            scrollController.jumpTo(scrollController.position.minScrollExtent);
-//          }
-//        }
-//      });
     });
   }
 
@@ -95,7 +83,6 @@ class _ChapterPageState extends State<ChapterPage> {
 
   @override
   Widget build(BuildContext context) {
-    print("building widget");
     scrollListView();
     MediaQueryData queryData = MediaQuery.of(context);
     var chapterText = "";
@@ -149,15 +136,11 @@ class _ChapterPageState extends State<ChapterPage> {
             Duration(milliseconds: 0),
             () => scrollController
                 .jumpTo(scrollController.position.maxScrollExtent));
-
-        //scrollController.jumpTo(scrollController.position.maxScrollExtent);
       } else if (tempDirection == bottom) {
         Timer(
             Duration(milliseconds: 0),
             () => scrollController
                 .jumpTo(scrollController.position.minScrollExtent));
-
-        //scrollController.jumpTo(scrollController.position.minScrollExtent);
       }
     }
   }
@@ -193,28 +176,48 @@ class _ChapterPageState extends State<ChapterPage> {
   }
 
   Widget getOptionsMenu() {
-    return AnimatedContainer(
-      width: double.infinity,
-      height: containerHeight,
-      color: Colors.amber,
-      child: Opacity(
-        opacity: opacityLevel,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            IconButton(
-              padding: EdgeInsets.fromLTRB(0, 18, 15, 0),
-              iconSize: 35,
-              onPressed: () {
-                loadChapter(top);
-              },
-              color: Colors.blue,
-              icon: Icon(Icons.refresh),
+    return Transform.translate(
+        offset: Offset(0, 0),
+        child: Container(
+          width: double.infinity,
+          height: containerHeight,
+          color: Colors.amber,
+          child: Opacity(
+            opacity: opacityLevel,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Container(
+                  width: 100.0,
+                  margin: EdgeInsets.only(top: 15),
+                  child: TextField(
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 30),
+                    decoration: InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(vertical: 0)),
+                    maxLines: 1,
+                    keyboardType: TextInputType.number,
+                    onChanged: (String value) {
+                      inputChapter = int.parse(value);
+                    },
+                  ),
+                ),
+                IconButton(
+                  padding: EdgeInsets.fromLTRB(0, 18, 15, 0),
+                  iconSize: 35,
+                  onPressed: () {
+                    if (inputChapter >= 0) {
+                      currentChapter = inputChapter;
+                      inputChapter = -1;
+                    }
+                    loadChapter(bottom);
+                  },
+                  color: Colors.blue,
+                  icon: Icon(Icons.refresh),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-      duration: Duration(milliseconds: 130),
-    );
+          ),
+        ));
   }
 }
