@@ -6,12 +6,13 @@ import './html_scraper.dart';
 
 class ChapterPage extends StatefulWidget {
   final int currentChapter;
+  final String baseURL;
 
-  ChapterPage({this.currentChapter});
+  ChapterPage({this.currentChapter, this.baseURL});
 
   @override
   State<StatefulWidget> createState() {
-    return _ChapterPageState(currentChapter);
+    return _ChapterPageState(currentChapter, baseURL);
   }
 }
 
@@ -29,8 +30,9 @@ class _ChapterPageState extends State<ChapterPage> {
   bool showLoadingScreen = true;
   bool changeScroll = false;
   String tempDirection = "Bottom";
+  String baseURL;
 
-  _ChapterPageState(this.currentChapter);
+  _ChapterPageState(this.currentChapter, this.baseURL);
 
   @override
   void initState() {
@@ -78,11 +80,25 @@ class _ChapterPageState extends State<ChapterPage> {
 
   Future<List<String>> getChapter() async {
     HtmlScraper htmlScraper = HtmlScraper();
-    return await htmlScraper.initiate(currentChapter);
+    return await htmlScraper.initiate(currentChapter, baseURL);
   }
 
   @override
   Widget build(BuildContext context) {
+    Widget body = buildBody(context);
+    return WillPopScope(
+      onWillPop: () {
+        print("Back button pressed!");
+        Navigator.pop(context, false);
+        return Future.value(false);
+      },
+      child: Scaffold(
+        body: body,
+      ),
+    );
+  }
+
+  Widget buildBody(BuildContext context) {
     scrollListView();
     MediaQueryData queryData = MediaQuery.of(context);
     var chapterText = "";
@@ -160,7 +176,7 @@ class _ChapterPageState extends State<ChapterPage> {
               child: Column(children: [
                 Text(
                   titleText,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30.0),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 27.0),
                 ),
                 Text(
                   chapterText,

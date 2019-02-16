@@ -1,0 +1,16 @@
+{
+  "novels": {
+    "wuxiaworld": {
+      "book1": {
+        "title": "the-great-ruler",
+        "baseURL": "wuxiaworld.com/novel/the-great-ruler/tgr-chapter-",
+        "imgSrc": "https://cdn.wuxiaworld.com/images/covers/tgr.jpg?ver=d3e56010728a3dfd129a911cc9e63f886ea5c09d"
+      },
+      "book2": {
+        "title": "a-will-eternal",
+        "baseURL": "wuxiaworld.com/novel/a-will-eternal/awe-chapter-",
+        "imgSrc": "https://cdn.wuxiaworld.com/images/covers/awe.jpg?ver=ad5a9a488196bf8529f2b6ec5a919531f8e57f52"
+      }
+    }
+  }
+}

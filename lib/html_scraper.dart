@@ -3,9 +3,9 @@ import 'package:html/parser.dart';
 import 'package:http/http.dart';
 
 class HtmlScraper {
-  Future<List<String>> initiate(int chapterNumber) async {
+  Future<List<String>> initiate(int chapterNumber, String baseURL) async {
     var client = Client();
-    String url = 'https://www.wuxiaworld.com/novel/imperial-god-emperor/ige-chapter-' + chapterNumber.toString();
+    String url = "https://www." + baseURL + chapterNumber.toString();
     Response response = await client.get(url);
 
     if (response.statusCode != 200) {
